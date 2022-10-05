@@ -40,3 +40,10 @@ class PostModelSerializer(serializers.ModelSerializer):
         model = PostModel
         fields = ["id", "title", "content", "user", "views", "is_active", "created_date",
                   "hashtags", "like_count", "is_liked"]
+
+
+class PostModelListSerializer(PostModelSerializer):
+    class Meta:
+        model = PostModel
+        fields = ["id", "title", "content", "user", "views", "is_active", "created_date",
+                  "hashtags", "like_count"]

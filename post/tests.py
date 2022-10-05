@@ -198,3 +198,7 @@ class PostServiceTest(TestCase):
 
         self.assertEqual(like_post_event(post_obj, user_obj), False)
         self.assertEqual(like_post_event(post_obj, user_obj), True)
+
+    
+    # def test_get_post_list(self):
+        

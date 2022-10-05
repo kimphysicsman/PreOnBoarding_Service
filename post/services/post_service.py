@@ -1,10 +1,15 @@
+from django.db.models.query_utils import Q
+
 from post.models import (
     Post as PostModel,
     Hashtag as HashtagModel,
     PostHashtag as PostHashtagModel,
     Like as LikeModel
 )
-from post.serializers import PostModelSerializer
+from post.serializers import (
+    PostModelSerializer,
+    PostModelListSerializer,
+    )
 
 def parsing_hashtags(hashtags):
     """해시태그 문자열을 리스트로 파싱하는 함수
@@ -234,3 +239,95 @@ def like_post_event(post_obj, user_obj):
         return False
 
     return True
+
+
+def get_post_list_deactive(user_obj):
+    """삭제(비활성화)된 게시글 정보 리스트 조회 함수
+
+    Args:
+        user_obj (UserModel): 조회한 유저 오브젝트
+
+    Returns:
+        dict: 삭제(비활성화)된 게시글 정보 리스트
+    """
+
+    post_obj_list_deactive = PostModel.objects.filter(user=user_obj, is_active=False)
+    return PostModelListSerializer(post_obj_list_deactive, many=True).data
+
+
+def get_post_list(orderby="created_date", reverse=0, search=None, hashtags=None, page=1, page_size=10):
+    """게시글 목록 조회 함수
+
+    Args:
+        orderby (str, optional): 정렬 기준. Defaults to "created_date".
+        reverse (int, optional):  1 - 오름차순,  0 - 내림차순. Defaults to 0.
+        search (str, optional): 검색단어. Defaults to None.
+        hashtags (str, optional): 해시태그 문자열 ex) '게임,코딩'. Defaults to None.
+        page (int, optional): 페이지. Defaults to 1.
+        page_size (int, optional): 1페이당 게시글 개수. Defaults to 10.
+
+    Returns:
+        list: 게시글 정보 리스트
+    """
+
+    # 검색단어
+    query = Q()
+    if search:
+        query = query & (Q(title__contains=search) | Q(content__contains=search))
+
+    post_obj_list = PostModel.objects.filter(query).all()
+    
+    # 해시태그
+    if hashtags:
+        hashtag_words = hashtags.split(",")
+        hashtag_obj_list = [ get_hashtag(word) for word in hashtag_words ]
+
+        for obj in hashtag_obj_list:
+            post_obj_list = post_obj_list.filter(Q(hashtag=obj))
+
+    post_info_list = PostModelListSerializer(post_obj_list, many=True).data
+
+    # 정렬
+    post_info_list.sort(key=choices_sort_func(orderby), reverse=reverse)
+    
+    # 페이징 
+    page -= 1
+    start_idx = page * page_size
+    end_idx = start_idx + page_size
+
+    # 페이지가 최대 또는 최소로 넘어갈 경우 1페이지로 반환
+    if len(post_info_list) < start_idx or page < 0:
+        post_info_list = post_info_list[:page_size]
+    else :
+        post_info_list = post_info_list[start_idx:end_idx]
+
+    return post_info_list
+
+
+def choices_sort_func(orderby):
+    """정렬 기준 선택 함수
+
+    Args:
+        orderby (str): 정렬 기준
+
+    Returns:
+        func: 정렬 기준 반환 함수
+    """
+
+    if orderby == "like_count":
+        return get_post_like_count
+    
+    if orderby == "views":
+        return get_post_views
+    
+    return get_post_created_date
+
+
+def get_post_created_date(post_info):
+    return post_info['created_date']
+
+def get_post_like_count(post_info):
+    return post_info['like_count']
+
+def get_post_views(post_info):
+    return post_info['views']
