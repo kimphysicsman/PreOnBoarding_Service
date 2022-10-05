@@ -66,7 +66,6 @@ def create_post(user_obj, title, content, hashtags):
     """
 
     data = {
-        "user" : user_obj.id,
         "title": title,
         "content": content,
         "views": 0,
@@ -75,7 +74,7 @@ def create_post(user_obj, title, content, hashtags):
 
     serializer = PostModelSerializer(data=data)
     serializer.is_valid(raise_exception=True)
-    serializer.save()
+    serializer.save(user=user_obj)
     
     post_obj = serializer.instance
 
@@ -88,28 +87,43 @@ def create_post(user_obj, title, content, hashtags):
     return post_obj
 
 
-def check_author(post_id, user_obj):
-    """해당 유저가 게시글의 작성자가 맞는지 확인하는 함수
+def get_post_obj(post_id):
+    """게시글 오브젝트 반환 함수
 
     Args:
         post_id (int): 게시글 id
+
+    Returns:
+        PostModel: 게시글 오브젝트
+                    해당 게시글이 없으면 None 반환
+    """
+
+    try:
+        post_obj = PostModel.objects.get(id=post_id)
+        return post_obj
+    except:
+        return None
+
+
+def check_author(post_obj, user_obj):
+    """해당 유저가 게시글의 작성자가 맞는지 확인하는 함수
+
+    Args:
+        post_obj (PostModel): 게시글 오브젝트
         user_obj (UserModel): 확인할 유저
 
     Returns:
         bool: 일치 여부
     """
 
-    post_obj = PostModel.objects.get(id=post_id)
-
     return post_obj.user == user_obj
 
 
-
-def update_post(post_id, title=None, content=None, hashtags=None):
+def update_post(post_obj, title=None, content=None, hashtags=None):
     """게시글 수정 함수
 
     Args:
-        post_id (int): 수정할 게시글 오브젝트 id
+        post_obj (PostModel): 수정할 게시글 오브젝트
         title (str, optional): 수정할 제목. Defaults to None.
         content (str, optional): 수정할 내용. Defaults to None.
         hashtags (str, optional): 수정할 해시태그. Defaults to None.
@@ -118,9 +132,6 @@ def update_post(post_id, title=None, content=None, hashtags=None):
         PostModel: 수정된 게시글 오브젝트
     """
     
-    
-    post_obj = PostModel.objects.get(id=post_id)
-
     if not(title or content or hashtags):
         return  post_obj
 
@@ -157,4 +168,48 @@ def update_post(post_id, title=None, content=None, hashtags=None):
     return post_obj
 
 
-# def 
+def delete_post(post_obj):
+    """게시글 삭제(비활성화) 함수
+
+    Args:
+        post_obj (PostModel): 게시글 오브젝트
+    """
+
+    post_obj.is_active = False
+    post_obj.save(update_fields=["is_active"])
+
+
+def get_post_info(post_obj, viewer):
+    """게시글 정보 반환 함수
+
+    Args:
+        post_obj (PostModel): 게시글 오브젝트
+        viewer (UserModel): 조회 유저 오브젝트
+
+    Returns:
+        dict: 게시글 정보
+    """
+
+    return PostModelSerializer(post_obj, context={"viewer": viewer}).data
+
+
+def increase_views(post_obj):
+    """게시글 조회수 증가 함수
+
+    Args:
+        post_obj (PostModel): 게시글 오브젝트
+    """
+
+    post_obj.views += 1
+    post_obj.save(update_fields=["views"])
+
+
+def recover_post(post_obj):
+    """게시글 복구 함수
+
+    Args:
+        post_obj (PostModel): 게시글 오브젝트
+    """
+
+    post_obj.is_active = True
+    post_obj.save(update_fields=["is_active"])
