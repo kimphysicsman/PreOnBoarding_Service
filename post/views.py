@@ -20,4 +20,7 @@ class PostView(APIView):
         except:
             return Response({"error" : "게시글 생성 실패"}, status=status.HTTP_400_BAD_REQUEST)
 
-        
+    # 게시글 수정
+    def put(self, request, post_id):
+        print(post_id)
+        return Response({}, status=status.HTTP_200_OK)

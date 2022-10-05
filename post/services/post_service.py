@@ -1,4 +1,5 @@
 from post.models import (
+    Post as PostModel,
     Hashtag as HashtagModel,
     PostHashtag as PostHashtagModel
 )
@@ -84,4 +85,56 @@ def create_post(user_obj, title, content, hashtags):
     for obj in hashtag_objs:
         PostHashtagModel.objects.get_or_create(hashtag=obj, post=post_obj)
 
+    return post_obj
+
+
+def update_post(post_id, title=None, content=None, hashtags=None):
+    """게시글 수정 함수
+
+    Args:
+        post_id (int): 수정할 게시글 오브젝트 id
+        title (str, optional): 수정할 제목. Defaults to None.
+        content (str, optional): 수정할 내용. Defaults to None.
+        hashtags (str, optional): 수정할 해시태그. Defaults to None.
+
+    Returns:
+        PostModel: 수정된 게시글 오브젝트
+    """
+    
+    
+    post_obj = PostModel.objects.get(id=post_id)
+
+    if not(title or content or hashtags):
+        return  post_obj
+
+    if title or content:
+        data = {}
+        if title:
+            data["title"] = title
+
+        if content:
+            data["content"] = content
+
+        serializer = PostModelSerializer(post_obj, data=data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+    if not hashtags:
+        return post_obj
+
+    hashtag_words = parsing_hashtags(hashtags)
+    new_hashtag_objs = [get_hashtag(word) for word in hashtag_words]
+
+    old_hashtag_objs = HashtagModel.objects.filter(post=post_obj)
+
+    for old_hashtag_obj in old_hashtag_objs:
+        if old_hashtag_obj in new_hashtag_objs:  
+            continue
+        old_hashtag_obj.delete()
+
+    for new_hashtag_obj in new_hashtag_objs:
+        if new_hashtag_obj in old_hashtag_objs:
+            continue
+        PostHashtagModel.objects.get_or_create(hashtag=new_hashtag_obj, post=post_obj)
+    
     return post_obj

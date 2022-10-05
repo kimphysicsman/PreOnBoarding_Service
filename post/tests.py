@@ -4,11 +4,13 @@ from user.models import User as UserModel
 from post.models import (
     Post as PostModel,
     Hashtag as HashtagModel,
+    PostHashtag as PostHashtagModel,
 )
 from post.services.post_service import (
     parsing_hashtags,
     check_hashtag,
     create_post,
+    update_post,
 )
 
 class PostServiceTest(TestCase):
@@ -18,17 +20,23 @@ class PostServiceTest(TestCase):
         TestCase를 위한 TestDB에 데이터 저장
         """
 
-        user_1 = UserModel.objects.create(
+        user_obj = UserModel.objects.create(
             email="test@email.com",
             username="test",
             password="test"
         )
 
-        post_1 = PostModel.objects.create(
-            user=user_1,
+        post_obj = PostModel.objects.create(
+            user=user_obj,
             title="title",
-            content="content",            
+            content="content",          
         )
+
+        hashtag_words = ["일상", "공유"]
+
+        for word in hashtag_words:
+            hashtag_obj = HashtagModel.objects.create(name=word)
+            PostHashtagModel.objects.create(post=post_obj, hashtag=hashtag_obj)
 
 
     def test_parsing_hashtags(self):
@@ -84,3 +92,30 @@ class PostServiceTest(TestCase):
         
         self.assertEqual(post_count_1 + 1, post_count_2)
         self.assertEqual(hashtag_count_1 + 2, hashtag_count_2)
+
+
+    def test_update_post(self):
+        """게시글 수정 함수 테스트
+
+            Case: 정상적으로 수정한 경우
+        """
+
+        data = {
+            "title": "new_title",
+            "content": "new_content",
+            "hashtags": "#일상,#게임"
+        }
+
+        post_obj = PostModel.objects.get(
+            title="title"
+        )
+
+        post_obj = update_post(post_obj.id, **data)
+
+        self.assertEqual(post_obj.title, "new_title")
+        self.assertEqual(post_obj.content, "new_content")
+        
+        hashtag_words = [obj.name for obj in HashtagModel.objects.filter(post=post_obj).all()]
+        
+        
+        self.assertSetEqual(set(["일상", "게임"]), set(hashtag_words))
