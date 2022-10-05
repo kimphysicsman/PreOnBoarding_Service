@@ -88,6 +88,23 @@ def create_post(user_obj, title, content, hashtags):
     return post_obj
 
 
+def check_author(post_id, user_obj):
+    """해당 유저가 게시글의 작성자가 맞는지 확인하는 함수
+
+    Args:
+        post_id (int): 게시글 id
+        user_obj (UserModel): 확인할 유저
+
+    Returns:
+        bool: 일치 여부
+    """
+
+    post_obj = PostModel.objects.get(id=post_id)
+
+    return post_obj.user == user_obj
+
+
+
 def update_post(post_id, title=None, content=None, hashtags=None):
     """게시글 수정 함수
 
@@ -138,3 +155,6 @@ def update_post(post_id, title=None, content=None, hashtags=None):
         PostHashtagModel.objects.get_or_create(hashtag=new_hashtag_obj, post=post_obj)
     
     return post_obj
+
+
+# def 
