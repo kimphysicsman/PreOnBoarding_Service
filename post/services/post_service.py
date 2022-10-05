@@ -1,7 +1,8 @@
 from post.models import (
     Post as PostModel,
     Hashtag as HashtagModel,
-    PostHashtag as PostHashtagModel
+    PostHashtag as PostHashtagModel,
+    Like as LikeModel
 )
 from post.serializers import PostModelSerializer
 
@@ -184,7 +185,7 @@ def get_post_info(post_obj, viewer):
 
     Args:
         post_obj (PostModel): 게시글 오브젝트
-        viewer (UserModel): 조회 유저 오브젝트
+        viewer (UserModel): 조회한 유저 오브젝트
 
     Returns:
         dict: 게시글 정보
@@ -213,3 +214,23 @@ def recover_post(post_obj):
 
     post_obj.is_active = True
     post_obj.save(update_fields=["is_active"])
+
+
+def like_post_event(post_obj, user_obj):
+    """좋아요 등록/취소 함수
+
+    Args:
+        post_obj (PostModel): 게시글 오브젝트
+        user_obj (UserModel): 좋아요 등록/취소한 유저 오브젝트
+
+    Returns:
+        bool: 좋아요 등록 - True / 좋아요 취소 - False
+    """
+
+    like_obj, created = LikeModel.objects.get_or_create(post=post_obj, user=user_obj)
+
+    if not created:
+        like_obj.delete()
+        return False
+
+    return True

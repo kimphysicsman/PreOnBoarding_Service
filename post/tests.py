@@ -15,6 +15,8 @@ from post.services.post_service import (
     delete_post,
     increase_views,
     get_post_info,
+    recover_post,
+    like_post_event,
 )
 
 class PostServiceTest(TestCase):
@@ -137,8 +139,6 @@ class PostServiceTest(TestCase):
 
         delete_post(post_obj)
 
-        post_obj = PostModel.objects.get(title="title")
-
         self.assertEqual(post_obj.is_active, False)
 
     
@@ -170,3 +170,31 @@ class PostServiceTest(TestCase):
         } 
 
         self.assertDictEqual(post_info, test_result)
+
+
+    def test_recover_post(self):
+        """게시글 복구 함수 테스트
+
+            Case: 정상적으로 복구한 경우
+        """
+
+        post_obj = PostModel.objects.get(title="title")
+        post_obj.is_active = False
+        post_obj.save(update_fields=["is_active"])
+
+        recover_post(post_obj)
+
+        self.assertEqual(post_obj.is_active, True)
+
+
+    def test_like_post_event(self):
+        """좋아요 등록/취소 함수 테스트
+
+            Case: 정상적으로 등록/취소한 경우
+        """
+
+        post_obj = PostModel.objects.get(title="title")
+        user_obj = UserModel.objects.get(username="test")
+
+        self.assertEqual(like_post_event(post_obj, user_obj), False)
+        self.assertEqual(like_post_event(post_obj, user_obj), True)

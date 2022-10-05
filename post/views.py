@@ -15,6 +15,7 @@ from post.services.post_service import (
     get_post_info,
     increase_views,
     recover_post,
+    like_post_event,
 )
 
 # 게시글 View
@@ -117,3 +118,26 @@ class RecoverPostView(APIView):
 
         except:
             return Response({"error": "게시글 복구 실패"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# 게시글 좋아요 View
+class LikeView(APIView):
+    # 좋아요 등록/취소
+    def post(self, request, post_id):
+        user = request.user
+        if not user.is_authenticated:
+            return Response({"detail": "서비스를 이용하기 위해 로그인 해주세요."}, status=status.HTTP_401_UNAUTHORIZED)
+             
+        post_obj = get_post_obj(post_id)
+        if not post_obj or not post_obj.is_active:
+            return Response({"detail": "해당 게시글을 찾을 수 없습니다."}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            if like_post_event(post_obj, user):
+                return Response({"success": "좋아요 등록 성공"}, status=status.HTTP_200_OK)
+
+            return Response({"success": "좋아요 취소 성공"}, status=status.HTTP_200_OK)
+
+        except:
+            return Response({"error": "좋아요 등록/취소 실패"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
