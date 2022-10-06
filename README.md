@@ -15,6 +15,46 @@
 
 <br /><br />
 
+> ## 💻 기술 스택
+`Python` `Django` `DRF`
+
+<br /><br />
+
+> ## 💡 핵심 구현
+
+> ### 1. service / view layer 분리
+
+- `view` : 요청 및 응답 데이터 처리  
+
+  - [대표코드 보기 (게시글 생성 - view)](https://github.com/kimphysicsman/PreOnBoarding_Service/blob/0178315dfe9786095dd59317ec9f263c1f4a24d0/post/views.py#L26)
+ 
+- `service` : 기능별 함수 구현
+
+  - [대표코드 보기 (게시글 생성 - service)](https://github.com/kimphysicsman/PreOnBoarding_Service/blob/0178315dfe9786095dd59317ec9f263c1f4a24d0/post/services/post_service.py#L61)  
+
+<br />
+
+> ### 2. 테스트 코드 작성
+
+`django.test.TestCase`를 이용한 service 함수별 테스트 코드 작성   
+
+[대표코드 보기 (게시글 생성 - test)](https://github.com/kimphysicsman/PreOnBoarding_Service/blob/0178315dfe9786095dd59317ec9f263c1f4a24d0/post/tests.py#L77)
+
+<br />
+
+> ### 3. 게시글 목록 조회 필터링 구현
+
+- `view` : 쿼리파라미터를 이용한 필터 데이터 처리
+
+  - [대표 코드보기 (게시글 목록 조회 - view)](https://github.com/kimphysicsman/PreOnBoarding_Service/blob/0178315dfe9786095dd59317ec9f263c1f4a24d0/post/views.py#L126)
+ 
+- `service` : `Q 객체`를 통한 쿼리 표현
+
+  - [대표 코드보기 (게시글 목록 조회 - service)](https://github.com/kimphysicsman/PreOnBoarding_Service/blob/0178315dfe9786095dd59317ec9f263c1f4a24d0/post/services/post_service.py#L258)
+
+
+<br /><br />
+
 > ## 📖 과제 해석
 
 > #### 1. 유저
@@ -53,57 +93,6 @@
     - `게시글` - FK
 - 주요기능
     - 게시글 좋아요 등록/취소
-
-<br />
-
-> ## ✏ 주요 기능
-
-> #### 1. 유저 관리
-- 회원가입
-    - 이메일을 ID로 사용
-    <br />
-- 로그인
-    - JWT 토근 인증
-
-> #### 2. 게시글 관리
-- 게시글 목록 조회
-    - 제목
-    - 내용
-    - 작성자
-    - 해시태그
-    - 작성일
-    - 좋아요 수
-    - 조회수
-    
-<br />
-
-- 게시글 생성  
-    - 작성자 정보는 JWT 인증정보에서 추출하여 등록  
-    - 게시글 생성시 해시태그를 추가할 수 있다.   
-    - 해시태그는 #로 시작되고 , 로 구분되는 텍스트가 입력된다. ex) { “hashtags”: “#맛집,#서울,#브런치 카페,#주말”, …}   
-    <br />
-- 게시글 수정   
-    - 작성자만 수정 가능  
-    <br />
-- 게시글 삭제  
-    - 작성자만 삭제 가능  
-    - 작성자는 삭제된 게시글을 복구 가능  
-    <br />
-- 게시글 복구  
-    - 게시글 목록 조회에서 본인이 삭제한 게시글 목록을 조회할 수 있고 삭제한 게시글을 다시 복구 가능  
-    <br />
-- 게시글 상세 조회  
-    - 제목  
-    - 내용  
-    - 작성자  
-    - 해시태그  
-    - 작성일  
-    - 좋아요 수  
-    - 조회수  
-    - 사용자의 게시글 좋아요 여부  
-    <br />
-- 게시글 좋아요 등록/취소  
-    - 좋아요 여부에 따라 등록/취소 수행  
 
 <br /><br />
 
@@ -164,18 +153,15 @@ ex) 게시글 수 = 100개 / page = 2, page_size = 30 일 경우
 
 <br /><br />
 
-> ## 💻 기술 스택
-`Python` `Django` `DRF`
-
-<br /><br />
-
 > ## 👉 ERD
 ![](https://velog.velcdn.com/images/kimphysicsman/post/b8c09c2a-5ae5-46e0-af3c-d05103ab8a50/image.png)
 
 <br /><br />
 
 > ## 🙏 API 명세서
-![](https://velog.velcdn.com/images/kimphysicsman/post/8c30a014-886b-41ba-a9c7-e26a28139e42/image.png)[**상세보기**](https://www.notion.so/kimphysicsman/a9d687f0195f42fc8fa6956fe838397d?v=f09a2d1955a4437a9009cef7d5d84865)
+![](https://velog.velcdn.com/images/kimphysicsman/post/8c30a014-886b-41ba-a9c7-e26a28139e42/image.png)
+
+[**상세보기**](https://www.notion.so/kimphysicsman/a9d687f0195f42fc8fa6956fe838397d?v=f09a2d1955a4437a9009cef7d5d84865)
 
 <br /><br />
 
